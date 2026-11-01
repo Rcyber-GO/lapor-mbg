@@ -11,10 +11,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class ReportController extends Controller
 {
@@ -60,23 +58,9 @@ class ReportController extends Controller
         ]);
     }
 
-    public function store(StoreReportRequest $request): RedirectResponse
+    public function store(StoreReportRequest $request, ReportWorkflow $workflow): RedirectResponse
     {
-        $file = $request->file('evidence');
-        // store() memberi nama acak; nama asli hanya disimpan untuk ditampilkan.
-        $path = $file->store(Report::EVIDENCE_DIRECTORY, Report::EVIDENCE_DISK);
-
-        try {
-            $report = $request->user()->reports()->make($request->safe()->except('evidence'));
-            $report->evidence_path = $path;
-            $report->evidence_name = Str::limit($file->getClientOriginalName(), 255, '');
-            $report->save();
-        } catch (Throwable $e) {
-            // Jangan tinggalkan file yatim bila laporan gagal tersimpan.
-            Storage::disk(Report::EVIDENCE_DISK)->delete($path);
-
-            throw $e;
-        }
+        $report = $workflow->submit($request->user(), $request->safe()->except('evidence'), $request->file('evidence'));
 
         return redirect()->route('reports.show', $report)->with('success', 'Laporan berhasil dikirim.');
     }

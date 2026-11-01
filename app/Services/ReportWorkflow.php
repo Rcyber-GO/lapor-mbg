@@ -9,6 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
@@ -18,6 +19,35 @@ use Throwable;
  */
 class ReportWorkflow
 {
+    /**
+     * Membuat laporan baru beserta bukti pendukungnya.
+     */
+    public function submit(User $reporter, array $data, UploadedFile $evidence): Report
+    {
+        // store() memberi nama acak; nama asli hanya disimpan untuk ditampilkan.
+        $path = $evidence->store(Report::EVIDENCE_DIRECTORY, Report::EVIDENCE_DISK);
+
+        try {
+            return DB::transaction(function () use ($reporter, $data, $evidence, $path) {
+                // Kunci baris pelapor agar dua pengiriman bersamaan tidak lolos BR-05.
+                User::whereKey($reporter->getKey())->lockForUpdate()->first();
+                $this->ensureNoActiveDuplicate($reporter->id, (int) $data['distribution_id']);
+
+                $report = $reporter->reports()->make($data);
+                $report->evidence_path = $path;
+                $report->evidence_name = Str::limit($evidence->getClientOriginalName(), 255, '');
+                $report->save();
+
+                return $report;
+            });
+        } catch (Throwable $e) {
+            // Jangan tinggalkan file yatim bila laporan gagal tersimpan.
+            Storage::disk(Report::EVIDENCE_DISK)->delete($path);
+
+            throw $e;
+        }
+    }
+
     /**
      * BR-01: pelapor hanya dapat memperbaiki laporan berstatus Dikirim atau
      * Perlu Dilengkapi. Laporan yang diperbaiki setelah diminta dilengkapi
@@ -34,6 +64,10 @@ class ReportWorkflow
 
                 if (! $report->isEditable()) {
                     throw new ReportWorkflowException('Laporan berstatus "'.$report->statusLabel().'" sedang atau sudah ditinjau sehingga tidak dapat diubah.');
+                }
+
+                if ((int) $data['distribution_id'] !== $report->distribution_id) {
+                    $this->ensureNoActiveDuplicate($report->user_id, (int) $data['distribution_id'], $report->id);
                 }
 
                 $report->fill($data);
@@ -109,6 +143,26 @@ class ReportWorkflow
 
             $report->notes()->create(['user_id' => $reviewer->id, 'note' => $note]);
         });
+    }
+
+    /**
+     * BR-05: satu pelapor hanya boleh memiliki satu laporan aktif (belum
+     * berstatus akhir) untuk distribusi yang sama, untuk mencegah laporan ganda.
+     */
+    private function ensureNoActiveDuplicate(int $userId, int $distributionId, ?int $exceptReportId = null): void
+    {
+        $existing = Report::query()
+            ->where('user_id', $userId)
+            ->where('distribution_id', $distributionId)
+            ->whereNotIn('status', Report::FINAL_STATUSES)
+            ->when($exceptReportId, fn ($query) => $query->whereKeyNot($exceptReportId))
+            ->first();
+
+        if ($existing) {
+            throw ValidationException::withMessages([
+                'distribution_id' => "Anda masih memiliki laporan aktif (#{$existing->id}) untuk distribusi ini. Silakan perbarui laporan tersebut.",
+            ]);
+        }
     }
 
     private function ensureNotFinal(Report $report): void
