@@ -99,7 +99,28 @@ class ReportController extends Controller
 
         $report->load(['school', 'distribution', 'user:id,name', 'notes' => fn ($query) => $query->with('user:id,name')->oldest('id')]);
 
-        return view('reports.show', ['report' => $report]);
+        return view('reports.show', [
+            'report' => $report,
+            'related' => Gate::allows('viewAny', Report::class) ? $this->relatedTo($report) : null,
+        ]);
+    }
+
+    /**
+     * Keterkaitan laporan untuk peninjauan staf. Sengaja tanpa data pelapor:
+     * yang dibutuhkan hanya gambaran kejadian pada distribusi/sekolah yang sama.
+     */
+    private function relatedTo(Report $report): array
+    {
+        $sameDistribution = Report::query()
+            ->where('distribution_id', $report->distribution_id)
+            ->whereKeyNot($report->id)
+            ->latest('id')
+            ->get(['id', 'status', 'affected_count', 'created_at']);
+
+        return [
+            'sameDistribution' => $sameDistribution,
+            'sameSchoolCount' => Report::where('school_id', $report->school_id)->whereKeyNot($report->id)->count(),
+        ];
     }
 
     /**

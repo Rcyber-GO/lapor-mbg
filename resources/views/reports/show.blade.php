@@ -64,6 +64,37 @@
         </dd>
     </dl>
 
+    @if ($related)
+        <h2 class="section-heading">Keterkaitan Laporan</h2>
+        <p style="margin-top: 0">
+            <strong>{{ $related['sameDistribution']->count() }}</strong> laporan lain pada distribusi yang sama
+            @if ($related['sameDistribution']->isNotEmpty())
+                (total perkiraan {{ $related['sameDistribution']->sum('affected_count') + $report->affected_count }} siswa terdampak, termasuk laporan ini)
+            @endif
+            &middot; <strong>{{ $related['sameSchoolCount'] }}</strong> laporan lain dari {{ $report->school->name }} (semua distribusi).
+        </p>
+        @if ($related['sameDistribution']->isNotEmpty())
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>No.</th><th>Dikirim</th><th>Terdampak</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($related['sameDistribution'] as $other)
+                            <tr>
+                                <td>#{{ $other->id }}</td>
+                                <td>{{ $other->created_at->translatedFormat('d M Y') }}</td>
+                                <td>{{ $other->affected_count }} orang</td>
+                                <td><span class="status-badge status-{{ $other->status }}">{{ $other->statusLabel() }}</span></td>
+                                <td><a class="button button-secondary button-small" href="{{ route('reports.show', $other) }}">Detail</a></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    @endif
+
     <h2 class="section-heading">Catatan Peninjauan</h2>
     @if ($report->notes->isEmpty())
         <p class="muted">Belum ada catatan.</p>
