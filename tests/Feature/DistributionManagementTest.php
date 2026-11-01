@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Distribution;
+use App\Models\Report;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -79,6 +80,28 @@ class DistributionManagementTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertSame('Menu diperbarui', $distribution->fresh()->menu);
+    }
+
+    public function test_distribution_with_reports_cannot_be_deleted(): void
+    {
+        $report = Report::factory()->create();
+
+        $this->actingAs($this->userWithRole(User::ROLE_KOORDINATOR))
+            ->delete('/distribusi/'.$report->distribution_id)
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('distributions', ['id' => $report->distribution_id]);
+    }
+
+    public function test_distribution_without_reports_can_be_deleted(): void
+    {
+        $distribution = Distribution::factory()->create();
+
+        $this->actingAs($this->userWithRole(User::ROLE_KOORDINATOR))
+            ->delete('/distribusi/'.$distribution->id)
+            ->assertRedirect('/distribusi');
+
+        $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
     }
 
     public function test_pelapor_cannot_manage_distributions(): void

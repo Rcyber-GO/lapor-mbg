@@ -61,6 +61,11 @@ class DistributionController extends Controller
 
     public function destroy(Distribution $distribution): RedirectResponse
     {
+        // Distribusi yang sudah dirujuk laporan harus tetap ada agar konteks laporan tidak hilang.
+        if ($distribution->reports()->exists()) {
+            return back()->with('error', 'Distribusi tidak dapat dihapus karena sudah memiliki laporan.');
+        }
+
         $distribution->delete();
 
         return redirect()->route('distributions.index')->with('success', 'Distribusi berhasil dihapus.');
