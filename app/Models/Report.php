@@ -76,6 +76,16 @@ class Report extends Model
     public const FINAL_STATUSES = [self::STATUS_DITERUSKAN, self::STATUS_SELESAI];
 
     /**
+     * Status yang masih dalam proses (belum berstatus akhir), dipakai halaman rekap.
+     */
+    public const IN_PROGRESS_STATUSES = [
+        self::STATUS_DIKIRIM,
+        self::STATUS_DITINJAU,
+        self::STATUS_PERLU_DILENGKAPI,
+        self::STATUS_PERLU_DITERUSKAN,
+    ];
+
+    /**
      * BR-02: peralihan status yang boleh dilakukan Pemantau Komunitas, beserta
      * apakah catatan wajib diisi. Peralihan lain hanya terjadi lewat aksi khusus:
      * perbaikan oleh pelapor (Perlu Dilengkapi → Dikirim) dan pencatatan

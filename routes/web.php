@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\ForwardingController;
+use App\Http\Controllers\RecapController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportReviewController;
 use App\Http\Controllers\SchoolController;
@@ -32,6 +33,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan-masuk', [ReportController::class, 'incoming'])
         ->middleware('can:viewAny,App\\Models\\Report')
         ->name('reports.incoming');
+    Route::get('/rekap', RecapController::class)
+        ->middleware('can:viewAny,App\\Models\\Report')
+        ->name('recap');
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
     Route::get('/laporan/{report}/bukti', [ReportController::class, 'evidence'])->whereNumber('report')->name('reports.evidence');
 

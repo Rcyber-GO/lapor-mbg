@@ -13,9 +13,11 @@
     @elseif (auth()->user()->isPemantau())
         <p>Tinjau kelengkapan laporan yang masuk dan keterkaitannya dengan sekolah atau distribusi yang sama.</p>
         <a class="button" href="{{ route('reports.incoming') }}">Lihat Laporan Masuk</a>
+        <a class="button button-secondary" href="{{ route('recap') }}">Lihat Rekap</a>
     @elseif (auth()->user()->isKoordinator())
         <p>Kelola data sekolah dan distribusi, pantau laporan masuk, dan catat penerusan informasi kepada pihak terkait.</p>
         <a class="button" href="{{ route('reports.incoming') }}">Lihat Laporan Masuk</a>
+        <a class="button button-secondary" href="{{ route('recap') }}">Lihat Rekap</a>
     @endif
 </section>
 @endsection

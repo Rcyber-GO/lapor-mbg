@@ -57,6 +57,10 @@
         .action-panel { border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin-top: 16px; }
         .action-panel h3 { margin: 0 0 10px; font-size: 1rem; }
         .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 8px 0 4px; }
+        .stat-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; background: #f9fafb; display: flex; flex-direction: column; gap: 4px; }
+        .stat-label { font-size: .85rem; color: #4b5563; }
+        .stat-value { font-size: 1.6rem; font-weight: 700; }
         .detail-list { display: grid; grid-template-columns: 220px 1fr; gap: 10px 20px; margin: 20px 0 0; }
         .detail-list dt { font-weight: 600; color: #4b5563; }
         .detail-list dd { margin: 0; }
@@ -84,6 +88,7 @@
             @endcan
             @can('viewAny', App\Models\Report::class)
                 <a class="nav-link" href="{{ route('reports.incoming') }}">Laporan Masuk</a>
+                <a class="nav-link" href="{{ route('recap') }}">Rekap</a>
             @endcan
             @can('manage-master-data')
                 <a class="nav-link" href="{{ route('schools.index') }}">Sekolah</a>
