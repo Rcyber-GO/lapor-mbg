@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\SchoolDistributionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -22,6 +23,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/laporan/buat', [ReportController::class, 'create'])->name('reports.create');
         Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');
+        Route::get('/sekolah/{school}/distribusi', SchoolDistributionController::class)
+            ->whereNumber('school')
+            ->name('schools.distributions');
     });
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
 
