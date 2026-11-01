@@ -7,6 +7,7 @@ use App\Models\Report;
 use App\Models\School;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -64,11 +65,9 @@ class ReportController extends Controller
 
     public function show(Report $report): View
     {
-        // Sementara hanya pemilik yang boleh melihat; aturan lengkap per peran
-        // akan dipindahkan ke ReportPolicy.
-        abort_unless($report->user_id === auth()->id(), 404);
+        Gate::authorize('view', $report);
 
-        $report->load(['school', 'distribution']);
+        $report->load(['school', 'distribution', 'user:id,name']);
 
         return view('reports.show', ['report' => $report]);
     }
@@ -78,7 +77,7 @@ class ReportController extends Controller
      */
     public function evidence(Report $report): StreamedResponse
     {
-        abort_unless($report->user_id === auth()->id(), 404);
+        Gate::authorize('viewEvidence', $report);
 
         $disk = Storage::disk(Report::EVIDENCE_DISK);
         abort_unless($disk->exists($report->evidence_path), 404);

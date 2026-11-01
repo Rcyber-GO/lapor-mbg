@@ -11,6 +11,12 @@
     <p class="muted">Dikirim {{ $report->created_at->translatedFormat('d M Y, H:i') }}</p>
 
     <dl class="detail-list">
+        @can('viewAny', App\Models\Report::class)
+            {{-- Hanya nama yang ditampilkan; kontak pribadi pelapor tidak diperlukan untuk peninjauan. --}}
+            <dt>Pelapor</dt>
+            <dd>{{ $report->user->name }}</dd>
+        @endcan
+
         <dt>Sekolah</dt>
         <dd>{{ $report->school->name }}</dd>
 
