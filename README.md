@@ -8,7 +8,7 @@ Aplikasi web pelaporan dan pemantauan keamanan makanan MBG (Mini Project Proyek 
 |---|---|
 | Nama | Muhammad Rif'q A |
 | NIM | 251511023 |
-| Kelas | _(isi kelas)_ |
+| Kelas | 2A-D3 |
 | Judul | Pelaporan dan Pemantauan Keamanan Makanan MBG |
 | Repository | https://github.com/Rcyber-GO/lapor-mbg |
 
