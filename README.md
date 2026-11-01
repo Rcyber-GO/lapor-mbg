@@ -19,4 +19,17 @@ Aplikasi web pelaporan dan pemantauan keamanan makanan MBG (Mini Project Proyek 
 - MySQL / MariaDB (mis. XAMPP)
 - Node.js & npm
 
+## Akun Demo
+
+Semua akun memakai password `password` (tersedia setelah `php artisan migrate --seed`).
+
+| Peran | Email |
+|---|---|
+| Pelapor | rina@example.test |
+| Pelapor | agus@example.test |
+| Pemantau Komunitas | dedi@example.test |
+| Koordinator Komunitas | sari@example.test |
+
+Registrasi mandiri (`/daftar`) selalu membuat akun Pelapor. Akun Pemantau dan Koordinator hanya disiapkan melalui seeder.
+
 _Langkah instalasi lengkap akan dilengkapi seiring pengembangan._
