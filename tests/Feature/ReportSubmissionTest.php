@@ -93,6 +93,18 @@ class ReportSubmissionTest extends TestCase
         $this->assertDatabaseCount('reports', 0);
     }
 
+    public function test_validation_messages_are_in_indonesian(): void
+    {
+        $distribution = Distribution::factory()->create(['distribution_date' => now()->subDay()]);
+
+        $this->actingAs($this->userWithRole(User::ROLE_PELAPOR))
+            ->post('/laporan', $this->payloadFor($distribution, ['symptoms' => '', 'description' => 'pendek']))
+            ->assertSessionHasErrors([
+                'symptoms' => 'Keluhan wajib diisi.',
+                'description' => 'Kronologi minimal 20 karakter.',
+            ]);
+    }
+
     public function test_distribution_from_another_school_is_rejected(): void
     {
         $distribution = Distribution::factory()->create(['distribution_date' => now()->subDay()]);
@@ -122,7 +134,7 @@ class ReportSubmissionTest extends TestCase
 
         $this->actingAs($this->userWithRole(User::ROLE_PELAPOR))
             ->post('/laporan', $this->payloadFor($distribution, ['incident_date' => now()->addDay()->toDateString()]))
-            ->assertSessionHasErrors('incident_date');
+            ->assertSessionHasErrors(['incident_date' => 'Tanggal kejadian tidak boleh melebihi hari ini.']);
 
         $this->assertDatabaseCount('reports', 0);
     }

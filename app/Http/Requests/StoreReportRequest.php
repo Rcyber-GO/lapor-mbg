@@ -77,6 +77,7 @@ class StoreReportRequest extends FormRequest
     {
         return [
             'distribution_id.exists' => 'Distribusi yang dipilih tidak sesuai dengan sekolah.',
+            'incident_date.before_or_equal' => 'Tanggal kejadian tidak boleh melebihi hari ini.',
         ];
     }
 }
