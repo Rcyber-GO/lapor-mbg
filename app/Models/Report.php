@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Observers\ReportObserver;
 use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'symptoms',
     'description',
 ])]
+#[ObservedBy(ReportObserver::class)]
 class Report extends Model
 {
     /** @use HasFactory<ReportFactory> */
@@ -136,6 +139,11 @@ class Report extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(ReportNote::class);
+    }
+
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(ReportStatusLog::class);
     }
 
     public function forwardings(): HasMany

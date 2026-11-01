@@ -123,6 +123,10 @@ class ReportController extends Controller
             'forwardings' => fn ($query) => $query->with('user:id,name')->oldest('id'),
         ]);
 
+        if (Gate::allows('viewAny', Report::class)) {
+            $report->load(['statusLogs' => fn ($query) => $query->with('user:id,name')->oldest('id')]);
+        }
+
         return view('reports.show', [
             'report' => $report,
             'related' => Gate::allows('viewAny', Report::class) ? $this->relatedTo($report) : null,

@@ -215,6 +215,32 @@
         @endif
     @endcan
 
+    @can('viewAny', App\Models\Report::class)
+        {{-- Jejak dari ReportObserver; hanya untuk staf. --}}
+        <h2 class="section-heading">Riwayat Status</h2>
+        @if ($report->statusLogs->isEmpty())
+            <p class="muted">Belum ada perubahan status yang tercatat.</p>
+        @else
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Waktu</th><th>Dari</th><th>Menjadi</th><th>Oleh</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($report->statusLogs as $log)
+                            <tr>
+                                <td>{{ $log->created_at->translatedFormat('d M Y, H:i') }}</td>
+                                <td>{{ $log->fromLabel() ?? '—' }}</td>
+                                <td>{{ $log->toLabel() }}</td>
+                                <td>{{ $log->user?->name ?? 'Sistem' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    @endcan
+
     <div class="form-actions" style="margin-top: 24px">
         @can('viewAny', App\Models\Report::class)
             <a class="button button-secondary" href="{{ route('reports.incoming') }}">&larr; Kembali ke Laporan Masuk</a>
