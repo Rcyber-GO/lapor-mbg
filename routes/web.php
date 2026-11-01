@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\ForwardingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportReviewController;
 use App\Http\Controllers\SchoolController;
@@ -45,6 +46,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/laporan/{report}/status', [ReportReviewController::class, 'updateStatus'])->name('reports.status');
         Route::post('/laporan/{report}/catatan', [ReportReviewController::class, 'storeNote'])->name('reports.notes.store');
     });
+
+    // Pencatatan penerusan oleh Koordinator Komunitas.
+    Route::post('/laporan/{report}/penerusan', [ForwardingController::class, 'store'])
+        ->middleware('can:forward,report')
+        ->whereNumber('report')
+        ->name('reports.forwardings.store');
 
     // Data pendukung hanya dikelola Koordinator Komunitas.
     Route::middleware('can:manage-master-data')->group(function () {

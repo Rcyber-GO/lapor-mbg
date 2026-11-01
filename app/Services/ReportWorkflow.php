@@ -146,6 +146,29 @@ class ReportWorkflow
     }
 
     /**
+     * BR-04: penerusan hanya dicatat untuk laporan yang sudah ditandai untuk
+     * diteruskan oleh Pemantau (atau sudah diteruskan, untuk pihak tambahan).
+     * Penerusan pertama mengubah status menjadi Sudah Diteruskan.
+     */
+    public function recordForwarding(Report $report, User $coordinator, array $data): void
+    {
+        DB::transaction(function () use ($report, $coordinator, $data) {
+            $report = $this->lock($report);
+
+            if (! $report->isForwardable()) {
+                throw new ReportWorkflowException('Penerusan hanya dapat dicatat untuk laporan yang sudah ditandai untuk diteruskan oleh Pemantau. Status saat ini: "'.$report->statusLabel().'".');
+            }
+
+            $report->forwardings()->create(['user_id' => $coordinator->id, ...$data]);
+
+            if ($report->status === Report::STATUS_PERLU_DITERUSKAN) {
+                $report->status = Report::STATUS_DITERUSKAN;
+                $report->save();
+            }
+        });
+    }
+
+    /**
      * BR-05: satu pelapor hanya boleh memiliki satu laporan aktif (belum
      * berstatus akhir) untuk distribusi yang sama, untuk mencegah laporan ganda.
      */

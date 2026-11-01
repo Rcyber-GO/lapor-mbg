@@ -59,7 +59,14 @@ class Report extends Model
     public const EDITABLE_STATUSES = [self::STATUS_DIKIRIM, self::STATUS_PERLU_DILENGKAPI];
 
     /**
-     * Status akhir: tidak ada perubahan status maupun catatan baru setelahnya.
+     * BR-04: status ketika koordinator boleh mencatat penerusan. Laporan yang
+     * sudah diteruskan boleh dicatat lagi bila diteruskan ke pihak tambahan.
+     */
+    public const FORWARDABLE_STATUSES = [self::STATUS_PERLU_DITERUSKAN, self::STATUS_DITERUSKAN];
+
+    /**
+     * Status akhir: tidak ada perubahan status maupun catatan baru setelahnya
+     * (kecuali penerusan tambahan, lihat FORWARDABLE_STATUSES).
      */
     public const FINAL_STATUSES = [self::STATUS_DITERUSKAN, self::STATUS_SELESAI];
 
@@ -127,6 +134,16 @@ class Report extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(ReportNote::class);
+    }
+
+    public function forwardings(): HasMany
+    {
+        return $this->hasMany(Forwarding::class);
+    }
+
+    public function isForwardable(): bool
+    {
+        return in_array($this->status, self::FORWARDABLE_STATUSES, true);
     }
 
     public function isEditable(): bool

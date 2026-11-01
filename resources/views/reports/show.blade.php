@@ -129,7 +129,7 @@
                         @csrf
                         <div class="form-field">
                             <label for="review_note">Catatan</label>
-                            <textarea id="review_note" name="note" rows="3" maxlength="2000" placeholder="Wajib diisi untuk tindakan bertanda *">{{ old('note') }}</textarea>
+                            <textarea id="review_note" name="note" rows="3" maxlength="2000" placeholder="Wajib diisi untuk tindakan bertanda *">{{ old('to_status') ? old('note') : '' }}</textarea>
                         </div>
                         <div class="action-buttons">
                             @foreach ($report->reviewTransitions() as $toStatus => $noteRequired)
@@ -153,6 +153,66 @@
                 </form>
             </div>
         @endunless
+    @endcan
+
+    <h2 class="section-heading">Penerusan Informasi</h2>
+    @if ($report->forwardings->isEmpty())
+        <p class="muted">Belum ada penerusan informasi kepada pihak terkait.</p>
+    @else
+        <ul class="note-list">
+            @foreach ($report->forwardings as $forwarding)
+                <li class="note-item">
+                    <div class="note-meta">
+                        Diteruskan {{ $forwarding->forwarded_at->translatedFormat('d M Y') }}
+                        @can('viewAny', App\Models\Report::class)
+                            &middot; dicatat oleh {{ $forwarding->user->name }}
+                        @endcan
+                    </div>
+                    <strong>{{ $forwarding->recipientTypeLabel() }}</strong>: {{ $forwarding->recipient_name }}
+                    {{-- Catatan penerusan bersifat internal untuk staf. --}}
+                    @can('viewAny', App\Models\Report::class)
+                        @if ($forwarding->note)
+                            <div style="white-space: pre-line; margin-top: 4px">{{ $forwarding->note }}</div>
+                        @endif
+                    @endcan
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    @can('forward', $report)
+        @if ($report->isForwardable())
+            <div class="action-panel">
+                <h3>Catat Penerusan</h3>
+                <form method="POST" action="{{ route('reports.forwardings.store', $report) }}">
+                    @csrf
+                    <div class="form-field">
+                        <label for="recipient_type">Jenis pihak</label>
+                        <select id="recipient_type" name="recipient_type" required>
+                            <option value="">Pilih</option>
+                            @foreach (App\Models\Forwarding::RECIPIENT_TYPES as $value => $label)
+                                <option value="{{ $value }}" @selected(old('recipient_type') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="recipient_name">Nama pihak</label>
+                        <input id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" maxlength="150" placeholder="mis. Kepala Sekolah {{ $report->school->name }}" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="forwarded_at">Tanggal diteruskan</label>
+                        <input id="forwarded_at" name="forwarded_at" type="date" value="{{ old('forwarded_at', now()->toDateString()) }}" min="{{ $report->created_at->toDateString() }}" max="{{ now()->toDateString() }}" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="forwarding_note">Catatan (opsional)</label>
+                        <textarea id="forwarding_note" name="note" rows="2" maxlength="2000">{{ old('recipient_type') ? old('note') : '' }}</textarea>
+                    </div>
+                    <button class="button button-small" type="submit">Simpan Penerusan</button>
+                </form>
+            </div>
+        @elseif (! $report->isFinal())
+            <p class="muted">Penerusan dapat dicatat setelah Pemantau menandai laporan ini untuk diteruskan.</p>
+        @endif
     @endcan
 
     <div class="form-actions" style="margin-top: 24px">

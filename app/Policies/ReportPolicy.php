@@ -54,6 +54,15 @@ class ReportPolicy
     }
 
     /**
+     * Mencatat penerusan informasi kepada pihak terkait. Kapan boleh (BR-04)
+     * ditentukan ReportWorkflow.
+     */
+    public function forward(User $user, Report $report): bool
+    {
+        return $user->isKoordinator();
+    }
+
+    /**
      * Laporan orang lain dijawab 404, bukan 403, agar keberadaannya tidak bocor.
      */
     private function ownerOrStaff(User $user, Report $report): Response
