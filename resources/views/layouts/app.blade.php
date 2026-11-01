@@ -48,6 +48,7 @@
         .detail-list { display: grid; grid-template-columns: 220px 1fr; gap: 10px 20px; margin: 20px 0 0; }
         .detail-list dt { font-weight: 600; color: #4b5563; }
         .detail-list dd { margin: 0; }
+        .evidence-preview { max-width: 100%; max-height: 320px; border: 1px solid #e5e7eb; border-radius: 8px; }
         .alert { border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
         .alert ul { margin: 0; padding-left: 18px; }
         .alert-success { background: #dcfce7; color: #166534; }

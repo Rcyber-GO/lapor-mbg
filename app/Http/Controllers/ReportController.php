@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class ReportController extends Controller
@@ -70,5 +71,20 @@ class ReportController extends Controller
         $report->load(['school', 'distribution']);
 
         return view('reports.show', ['report' => $report]);
+    }
+
+    /**
+     * Bukti disajikan lewat controller (bukan URL publik) agar hak akses selalu dicek.
+     */
+    public function evidence(Report $report): StreamedResponse
+    {
+        abort_unless($report->user_id === auth()->id(), 404);
+
+        $disk = Storage::disk(Report::EVIDENCE_DISK);
+        abort_unless($disk->exists($report->evidence_path), 404);
+
+        return $disk->response($report->evidence_path, $report->evidence_name, [
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 }

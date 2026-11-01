@@ -31,6 +31,16 @@
 
         <dt>Kronologi</dt>
         <dd style="white-space: pre-line">{{ $report->description }}</dd>
+
+        <dt>Bukti pendukung</dt>
+        <dd>
+            <a href="{{ route('reports.evidence', $report) }}" target="_blank" rel="noopener">{{ $report->evidence_name }}</a>
+            @if ($report->evidenceIsImage())
+                <a href="{{ route('reports.evidence', $report) }}" target="_blank" rel="noopener" style="display: block; margin-top: 10px">
+                    <img src="{{ route('reports.evidence', $report) }}" alt="Bukti pendukung laporan #{{ $report->id }}" class="evidence-preview">
+                </a>
+            @endif
+        </dd>
     </dl>
 
     @can('create-report')

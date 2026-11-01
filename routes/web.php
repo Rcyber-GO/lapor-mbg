@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
             ->name('schools.distributions');
     });
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
+    Route::get('/laporan/{report}/bukti', [ReportController::class, 'evidence'])->whereNumber('report')->name('reports.evidence');
 
     // Data pendukung hanya dikelola Koordinator Komunitas.
     Route::middleware('can:manage-master-data')->group(function () {
