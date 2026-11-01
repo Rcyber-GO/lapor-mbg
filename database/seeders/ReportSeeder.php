@@ -12,43 +12,120 @@ use Illuminate\Support\Facades\Storage;
 class ReportSeeder extends Seeder
 {
     /**
-     * Contoh laporan fiktif. Rina dan Agus melapor distribusi terbaru SMP Harapan
-     * (dua laporan pada distribusi yang sama), Agus juga melapor sekolah lain.
+     * Contoh laporan fiktif dalam berbagai status agar setiap alur dan business
+     * rule dapat langsung dicoba:
+     * - Rina: Perlu Dilengkapi (BR-01: boleh diperbaiki), Sedang Ditinjau
+     *   (BR-01: tidak boleh diubah), dan Selesai Dipantau pada distribusi lama
+     *   SMP Harapan (BR-05: laporan baru untuk distribusi itu boleh, untuk
+     *   distribusi terbaru ditolak karena masih ada laporan aktif).
+     * - Agus: Ditandai untuk Diteruskan (BR-04: koordinator dapat mencatat
+     *   penerusan), Dikirim (siap ditinjau), dan Sudah Diteruskan.
+     * Laporan Rina dan Agus pada distribusi terbaru SMP Harapan saling terkait.
      */
     public function run(): void
     {
         $rina = User::where('email', 'rina@example.test')->firstOrFail();
         $agus = User::where('email', 'agus@example.test')->firstOrFail();
-
-        $harapan = $this->latestDistributionOf('SMP Harapan');
-        $tunasBangsa = $this->latestDistributionOf('SD Tunas Bangsa');
+        $dedi = User::where('email', 'dedi@example.test')->firstOrFail();
+        $sari = User::where('email', 'sari@example.test')->firstOrFail();
 
         $reports = [
-            [$rina, $harapan, 'orang_tua', 6, 'Mual, sakit perut',
-                'Anak saya makan siang dari program MBG pukul 11.30. Sekitar pukul 14.00 ia mengeluh mual dan sakit perut. Ia mendengar beberapa teman sekelas mengalami keluhan serupa.',
-                'png', 'foto-menu-makan-siang.png'],
-            [$agus, $harapan, 'guru', 10, 'Mual, muntah, pusing',
-                'Setelah jam makan siang, beberapa siswa kelas 8 meminta izin ke UKS karena mual dan pusing. Dua siswa sempat muntah.',
-                'pdf', 'catatan-uks.pdf'],
-            [$agus, $tunasBangsa, 'orang_tua', 2, 'Diare',
-                'Anak saya mengalami diare pada malam hari setelah mengonsumsi makanan MBG di sekolah. Adiknya yang bersekolah di tempat yang sama juga mengeluh hal serupa.',
-                'png', 'foto-sisa-makanan.png'],
+            [
+                'user' => $rina, 'distribution' => $this->distributionOf('SMP Harapan'),
+                'relation' => 'orang_tua', 'affected' => 6, 'symptoms' => 'Mual, sakit perut',
+                'description' => 'Anak saya makan siang dari program MBG pukul 11.30. Sekitar pukul 14.00 ia mengeluh mual dan sakit perut. Ia mendengar beberapa teman sekelas mengalami keluhan serupa.',
+                'evidence' => ['png', 'foto-menu-makan-siang.png'],
+                'status' => Report::STATUS_PERLU_DILENGKAPI,
+                'notes' => [
+                    [Report::STATUS_DITINJAU, 'Laporan mulai ditinjau.'],
+                    [Report::STATUS_PERLU_DILENGKAPI, 'Mohon lengkapi jumlah teman sekelas yang mengalami keluhan serupa dan apakah anak sudah diperiksa di fasilitas kesehatan.'],
+                ],
+            ],
+            [
+                'user' => $agus, 'distribution' => $this->distributionOf('SMP Harapan'),
+                'relation' => 'guru', 'affected' => 10, 'symptoms' => 'Mual, muntah, pusing',
+                'description' => 'Setelah jam makan siang, beberapa siswa kelas 8 meminta izin ke UKS karena mual dan pusing. Dua siswa sempat muntah.',
+                'evidence' => ['pdf', 'catatan-uks.pdf'],
+                'status' => Report::STATUS_PERLU_DITERUSKAN,
+                'notes' => [
+                    [Report::STATUS_DITINJAU, 'Laporan mulai ditinjau.'],
+                    [Report::STATUS_PERLU_DITERUSKAN, 'Terdapat laporan lain pada distribusi yang sama dan catatan UKS terlampir. Perlu diteruskan kepada sekolah dan SPPG.'],
+                ],
+            ],
+            [
+                'user' => $agus, 'distribution' => $this->distributionOf('SD Tunas Bangsa'),
+                'relation' => 'orang_tua', 'affected' => 2, 'symptoms' => 'Diare',
+                'description' => 'Anak saya mengalami diare pada malam hari setelah mengonsumsi makanan MBG di sekolah. Adiknya yang bersekolah di tempat yang sama juga mengeluh hal serupa.',
+                'evidence' => ['png', 'foto-sisa-makanan.png'],
+                'status' => Report::STATUS_DIKIRIM,
+            ],
+            [
+                'user' => $rina, 'distribution' => $this->distributionOf('SD Pelita Ilmu'),
+                'relation' => 'orang_tua', 'affected' => 3, 'symptoms' => 'Sakit perut',
+                'description' => 'Keponakan saya yang bersekolah di SD Pelita Ilmu mengeluh sakit perut setelah makan siang, begitu juga dua temannya.',
+                'evidence' => ['png', 'foto-kemasan.png'],
+                'status' => Report::STATUS_DITINJAU,
+                'notes' => [
+                    [Report::STATUS_DITINJAU, 'Laporan mulai ditinjau, menunggu kabar dari wali kelas.'],
+                ],
+            ],
+            [
+                'user' => $agus, 'distribution' => $this->distributionOf('SMP Cendekia'),
+                'relation' => 'guru', 'affected' => 15, 'symptoms' => 'Mual, demam ringan',
+                'description' => 'Sekitar lima belas siswa dari tiga kelas mengeluh mual dan sebagian demam ringan sore hari setelah makan siang.',
+                'evidence' => ['pdf', 'daftar-siswa-uks.pdf'],
+                'status' => Report::STATUS_DITERUSKAN,
+                'notes' => [
+                    [Report::STATUS_DITINJAU, 'Laporan mulai ditinjau.'],
+                    [Report::STATUS_PERLU_DITERUSKAN, 'Jumlah siswa terdampak cukup banyak, perlu diteruskan kepada sekolah.'],
+                ],
+                'forwarding' => ['sekolah', 'Kepala Sekolah SMP Cendekia', 'Disampaikan langsung kepada kepala sekolah untuk ditindaklanjuti bersama SPPG.'],
+            ],
+            [
+                'user' => $rina, 'distribution' => $this->distributionOf('SMP Harapan', 1),
+                'relation' => 'orang_tua', 'affected' => 1, 'symptoms' => 'Pusing',
+                'description' => 'Anak saya sempat pusing setelah makan siang, tetapi membaik setelah beristirahat di UKS.',
+                'evidence' => ['png', 'foto-menu-pekan-lalu.png'],
+                'status' => Report::STATUS_SELESAI,
+                'notes' => [
+                    [Report::STATUS_DITINJAU, 'Laporan mulai ditinjau.'],
+                    [Report::STATUS_SELESAI, 'Keluhan sudah membaik dan tidak ada laporan serupa pada distribusi ini. Tidak perlu tindak lanjut.'],
+                ],
+            ],
         ];
 
-        foreach ($reports as $index => [$user, $distribution, $relation, $affected, $symptoms, $description, $type, $evidenceName]) {
-            $report = $user->reports()->firstOrNew(['distribution_id' => $distribution->id]);
+        foreach ($reports as $index => $data) {
+            $distribution = $data['distribution'];
+            [$type, $evidenceName] = $data['evidence'];
+
+            $report = $data['user']->reports()->firstOrNew(['distribution_id' => $distribution->id]);
             $report->fill([
                 'school_id' => $distribution->school_id,
-                'reporter_relation' => $relation,
+                'reporter_relation' => $data['relation'],
                 'incident_date' => $distribution->distribution_date,
-                'affected_count' => $affected,
-                'symptoms' => $symptoms,
-                'description' => $description,
+                'affected_count' => $data['affected'],
+                'symptoms' => $data['symptoms'],
+                'description' => $data['description'],
             ]);
-
             $report->evidence_path = $this->storeDummyEvidence($index + 1, $type);
             $report->evidence_name = $evidenceName;
+            // Seeder tepercaya menetapkan status langsung; di aplikasi status hanya berubah lewat ReportWorkflow.
+            $report->status = $data['status'];
             $report->save();
+
+            foreach ($data['notes'] ?? [] as [$status, $note]) {
+                $report->notes()->firstOrCreate(['note' => $note], ['user_id' => $dedi->id, 'status' => $status]);
+            }
+
+            if (isset($data['forwarding'])) {
+                [$recipientType, $recipientName, $note] = $data['forwarding'];
+                $report->forwardings()->firstOrCreate(['recipient_name' => $recipientName], [
+                    'user_id' => $sari->id,
+                    'recipient_type' => $recipientType,
+                    'forwarded_at' => now()->toDateString(),
+                    'note' => $note,
+                ]);
+            }
         }
     }
 
@@ -106,11 +183,15 @@ class ReportSeeder extends Seeder
         return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$xref}\n%%EOF\n";
     }
 
-    private function latestDistributionOf(string $schoolName): Distribution
+    /**
+     * Distribusi suatu sekolah, diurutkan dari yang terbaru ($offset 0 = terbaru).
+     */
+    private function distributionOf(string $schoolName, int $offset = 0): Distribution
     {
         return School::where('name', $schoolName)->firstOrFail()
             ->distributions()
             ->latest('distribution_date')
+            ->skip($offset)
             ->firstOrFail();
     }
 }
