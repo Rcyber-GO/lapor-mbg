@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Markup pagination polos (tanpa Tailwind), diberi gaya di layouts/app.
+        Paginator::useBootstrapFour();
+
+        Gate::define('manage-master-data', fn (User $user): bool => $user->isKoordinator());
     }
 }

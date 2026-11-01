@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SchoolController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -14,4 +15,12 @@ Route::middleware('auth')->group(function () {
     Route::redirect('/', '/dashboard');
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Data pendukung hanya dikelola Koordinator Komunitas.
+    Route::middleware('can:manage-master-data')->group(function () {
+        Route::resource('sekolah', SchoolController::class)
+            ->except('show')
+            ->parameters(['sekolah' => 'school'])
+            ->names('schools');
+    });
 });

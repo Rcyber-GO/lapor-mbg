@@ -24,6 +24,25 @@
         .form-field label { display: block; font-weight: 600; margin-bottom: 6px; }
         .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; }
         .button { display: inline-block; background: #15803d; color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .button-secondary { background: #fff; color: #1f2937; border: 1px solid #d1d5db; }
+        .button-danger { background: #b91c1c; }
+        .button-small { padding: 6px 12px; font-size: .875rem; }
+        .page-title-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
+        .filter-form label { display: block; font-size: .8rem; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
+        .filter-form input, .filter-form select { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; }
+        .form-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .table-wrap { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        .data-table th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #4b5563; }
+        .row-actions { display: flex; gap: 6px; }
+        .row-actions form { margin: 0; }
+        .empty-state { text-align: center; color: #6b7280; padding: 24px; }
+        .pagination { display: flex; gap: 4px; list-style: none; padding: 0; margin: 16px 0 0; flex-wrap: wrap; }
+        .page-link { display: block; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 6px; text-decoration: none; color: #1f2937; background: #fff; }
+        .page-item.active .page-link { background: #15803d; border-color: #15803d; color: #fff; }
+        .page-item.disabled .page-link { color: #9ca3af; }
         .alert { border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
         .alert ul { margin: 0; padding-left: 18px; }
         .alert-success { background: #dcfce7; color: #166534; }
@@ -40,6 +59,9 @@
         <a class="brand" href="{{ auth()->check() ? route('dashboard') : route('login') }}">Lapor MBG</a>
         @auth
             <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+            @can('manage-master-data')
+                <a class="nav-link" href="{{ route('schools.index') }}">Sekolah</a>
+            @endcan
             <span class="role-badge" title="Peran akun yang sedang login">{{ auth()->user()->name }} &middot; {{ auth()->user()->roleLabel() }}</span>
             <form method="POST" action="{{ route('logout') }}" style="margin: 0">
                 @csrf
