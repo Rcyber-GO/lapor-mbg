@@ -66,6 +66,9 @@
         <a class="brand" href="{{ auth()->check() ? route('dashboard') : route('login') }}">Lapor MBG</a>
         @auth
             <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+            @can('create-report')
+                <a class="nav-link" href="{{ route('reports.index') }}">Laporan Saya</a>
+            @endcan
             @can('manage-master-data')
                 <a class="nav-link" href="{{ route('schools.index') }}">Sekolah</a>
                 <a class="nav-link" href="{{ route('distributions.index') }}">Distribusi</a>

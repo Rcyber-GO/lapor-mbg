@@ -7,10 +7,29 @@ use App\Models\Distribution;
 use App\Models\Report;
 use App\Models\School;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ReportController extends Controller
 {
+    /**
+     * Daftar laporan milik pelapor yang sedang login saja.
+     */
+    public function index(Request $request): View
+    {
+        $reports = $request->user()->reports()
+            ->with(['school:id,name', 'distribution:id,distribution_date'])
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->status))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('reports.index', [
+            'reports' => $reports,
+            'statuses' => Report::STATUS_LABELS,
+        ]);
+    }
+
     public function create(): View
     {
         return view('reports.create', [

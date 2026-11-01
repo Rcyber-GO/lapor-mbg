@@ -32,5 +32,11 @@
         <dt>Kronologi</dt>
         <dd style="white-space: pre-line">{{ $report->description }}</dd>
     </dl>
+
+    @can('create-report')
+        <div class="form-actions" style="margin-top: 24px">
+            <a class="button button-secondary" href="{{ route('reports.index') }}">&larr; Kembali ke Laporan Saya</a>
+        </div>
+    @endcan
 </section>
 @endsection
