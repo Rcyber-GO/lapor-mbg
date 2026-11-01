@@ -45,6 +45,18 @@
         .page-item.disabled .page-link { color: #9ca3af; }
         .status-badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: .85rem; font-weight: 600; background: #e5e7eb; color: #374151; }
         .status-dikirim { background: #dbeafe; color: #1e40af; }
+        .status-ditinjau { background: #fef3c7; color: #92400e; }
+        .status-perlu_dilengkapi { background: #ffedd5; color: #9a3412; }
+        .status-perlu_diteruskan { background: #ede9fe; color: #5b21b6; }
+        .status-diteruskan { background: #dcfce7; color: #166534; }
+        .status-selesai { background: #e5e7eb; color: #374151; }
+        .section-heading { font-size: 1.1rem; margin: 28px 0 12px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+        .note-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+        .note-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; background: #f9fafb; }
+        .note-meta { font-size: .85rem; color: #6b7280; margin-bottom: 4px; }
+        .action-panel { border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin-top: 16px; }
+        .action-panel h3 { margin: 0 0 10px; font-size: 1rem; }
+        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
         .detail-list { display: grid; grid-template-columns: 220px 1fr; gap: 10px 20px; margin: 20px 0 0; }
         .detail-list dt { font-weight: 600; color: #4b5563; }
         .detail-list dd { margin: 0; }

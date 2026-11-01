@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * user_id dan status sengaja tidak fillable: pemilik diisi lewat relasi
@@ -30,8 +31,55 @@ class Report extends Model
 
     public const STATUS_DIKIRIM = 'dikirim';
 
+    public const STATUS_DITINJAU = 'ditinjau';
+
+    public const STATUS_PERLU_DILENGKAPI = 'perlu_dilengkapi';
+
+    public const STATUS_PERLU_DITERUSKAN = 'perlu_diteruskan';
+
+    public const STATUS_DITERUSKAN = 'diteruskan';
+
+    public const STATUS_SELESAI = 'selesai';
+
+    /**
+     * Label sengaja tidak memberi kesan diagnosis atau penetapan resmi (§5.6).
+     */
     public const STATUS_LABELS = [
         self::STATUS_DIKIRIM => 'Dikirim',
+        self::STATUS_DITINJAU => 'Sedang Ditinjau',
+        self::STATUS_PERLU_DILENGKAPI => 'Perlu Dilengkapi',
+        self::STATUS_PERLU_DITERUSKAN => 'Ditandai untuk Diteruskan',
+        self::STATUS_DITERUSKAN => 'Sudah Diteruskan',
+        self::STATUS_SELESAI => 'Selesai Dipantau',
+    ];
+
+    /**
+     * Status akhir: tidak ada perubahan status maupun catatan baru setelahnya.
+     */
+    public const FINAL_STATUSES = [self::STATUS_DITERUSKAN, self::STATUS_SELESAI];
+
+    /**
+     * BR-02: peralihan status yang boleh dilakukan Pemantau Komunitas, beserta
+     * apakah catatan wajib diisi. Peralihan lain hanya terjadi lewat aksi khusus:
+     * perbaikan oleh pelapor (Perlu Dilengkapi → Dikirim) dan pencatatan
+     * penerusan oleh koordinator (Ditandai untuk Diteruskan → Sudah Diteruskan).
+     */
+    public const REVIEW_TRANSITIONS = [
+        self::STATUS_DIKIRIM => [
+            self::STATUS_DITINJAU => false,
+        ],
+        self::STATUS_DITINJAU => [
+            self::STATUS_PERLU_DILENGKAPI => true,
+            self::STATUS_PERLU_DITERUSKAN => true,
+            self::STATUS_SELESAI => true,
+        ],
+    ];
+
+    public const REVIEW_ACTION_LABELS = [
+        self::STATUS_DITINJAU => 'Mulai Tinjau',
+        self::STATUS_PERLU_DILENGKAPI => 'Minta Dilengkapi',
+        self::STATUS_PERLU_DITERUSKAN => 'Tandai untuk Diteruskan',
+        self::STATUS_SELESAI => 'Selesai Dipantau',
     ];
 
     public const EVIDENCE_DISK = 'local';
@@ -69,6 +117,26 @@ class Report extends Model
     public function distribution(): BelongsTo
     {
         return $this->belongsTo(Distribution::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(ReportNote::class);
+    }
+
+    public function isFinal(): bool
+    {
+        return in_array($this->status, self::FINAL_STATUSES, true);
+    }
+
+    /**
+     * Peralihan yang sah dari status saat ini: [status tujuan => catatan wajib].
+     *
+     * @return array<string, bool>
+     */
+    public function reviewTransitions(): array
+    {
+        return self::REVIEW_TRANSITIONS[$this->status] ?? [];
     }
 
     public function statusLabel(): string

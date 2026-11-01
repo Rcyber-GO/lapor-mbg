@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportReviewController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolDistributionController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,12 @@ Route::middleware('auth')->group(function () {
         ->name('reports.incoming');
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
     Route::get('/laporan/{report}/bukti', [ReportController::class, 'evidence'])->whereNumber('report')->name('reports.evidence');
+
+    // Peninjauan oleh Pemantau Komunitas.
+    Route::middleware('can:review,report')->whereNumber('report')->group(function () {
+        Route::post('/laporan/{report}/status', [ReportReviewController::class, 'updateStatus'])->name('reports.status');
+        Route::post('/laporan/{report}/catatan', [ReportReviewController::class, 'storeNote'])->name('reports.notes.store');
+    });
 
     // Data pendukung hanya dikelola Koordinator Komunitas.
     Route::middleware('can:manage-master-data')->group(function () {

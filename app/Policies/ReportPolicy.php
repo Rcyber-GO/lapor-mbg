@@ -31,6 +31,15 @@ class ReportPolicy
     }
 
     /**
+     * Mengubah status dan memberi catatan peninjauan. Kapan boleh dilakukan
+     * (status yang sah) ditentukan ReportWorkflow.
+     */
+    public function review(User $user, Report $report): bool
+    {
+        return $user->isPemantau();
+    }
+
+    /**
      * Laporan orang lain dijawab 404, bukan 403, agar keberadaannya tidak bocor.
      */
     private function ownerOrStaff(User $user, Report $report): Response

@@ -83,7 +83,7 @@ class ReportController extends Controller
     {
         Gate::authorize('view', $report);
 
-        $report->load(['school', 'distribution', 'user:id,name']);
+        $report->load(['school', 'distribution', 'user:id,name', 'notes' => fn ($query) => $query->with('user:id,name')->oldest('id')]);
 
         return view('reports.show', ['report' => $report]);
     }

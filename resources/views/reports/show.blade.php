@@ -49,6 +49,66 @@
         </dd>
     </dl>
 
+    <h2 class="section-heading">Catatan Peninjauan</h2>
+    @if ($report->notes->isEmpty())
+        <p class="muted">Belum ada catatan.</p>
+    @else
+        <ul class="note-list">
+            @foreach ($report->notes as $note)
+                <li class="note-item">
+                    <div class="note-meta">
+                        {{-- Pelapor hanya melihat peran penulis, bukan nama Pemantau. --}}
+                        @can('viewAny', App\Models\Report::class)
+                            {{ $note->user->name }}
+                        @else
+                            Pemantau Komunitas
+                        @endcan
+                        &middot; {{ $note->created_at->translatedFormat('d M Y, H:i') }}
+                        @if ($note->statusLabel())
+                            &middot; status menjadi <strong>{{ $note->statusLabel() }}</strong>
+                        @endif
+                    </div>
+                    <div style="white-space: pre-line">{{ $note->note }}</div>
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    @can('review', $report)
+        @unless ($report->isFinal())
+            <div class="action-panel">
+                <h3>Tindakan Peninjauan</h3>
+                @if ($report->reviewTransitions())
+                    <form method="POST" action="{{ route('reports.status', $report) }}">
+                        @csrf
+                        <div class="form-field">
+                            <label for="review_note">Catatan</label>
+                            <textarea id="review_note" name="note" rows="3" maxlength="2000" placeholder="Wajib diisi untuk tindakan bertanda *">{{ old('note') }}</textarea>
+                        </div>
+                        <div class="action-buttons">
+                            @foreach ($report->reviewTransitions() as $toStatus => $noteRequired)
+                                <button class="button button-small" type="submit" name="to_status" value="{{ $toStatus }}">
+                                    {{ App\Models\Report::REVIEW_ACTION_LABELS[$toStatus] }}{{ $noteRequired ? ' *' : '' }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </form>
+                @else
+                    <p class="muted" style="margin-top: 0">Tidak ada perubahan status yang dapat dilakukan Pemantau pada status ini.</p>
+                @endif
+
+                <form method="POST" action="{{ route('reports.notes.store', $report) }}" style="margin-top: 16px">
+                    @csrf
+                    <div class="form-field">
+                        <label for="extra_note">Tambah catatan tanpa mengubah status</label>
+                        <textarea id="extra_note" name="note" rows="2" maxlength="2000" required></textarea>
+                    </div>
+                    <button class="button button-secondary button-small" type="submit">Simpan Catatan</button>
+                </form>
+            </div>
+        @endunless
+    @endcan
+
     <div class="form-actions" style="margin-top: 24px">
         @can('viewAny', App\Models\Report::class)
             <a class="button button-secondary" href="{{ route('reports.incoming') }}">&larr; Kembali ke Laporan Masuk</a>
