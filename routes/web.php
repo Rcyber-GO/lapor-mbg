@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\SchoolController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,5 +23,10 @@ Route::middleware('auth')->group(function () {
             ->except('show')
             ->parameters(['sekolah' => 'school'])
             ->names('schools');
+
+        Route::resource('distribusi', DistributionController::class)
+            ->except('show')
+            ->parameters(['distribusi' => 'distribution'])
+            ->names('distributions');
     });
 });

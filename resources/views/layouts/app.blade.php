@@ -61,6 +61,7 @@
             <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
             @can('manage-master-data')
                 <a class="nav-link" href="{{ route('schools.index') }}">Sekolah</a>
+                <a class="nav-link" href="{{ route('distributions.index') }}">Distribusi</a>
             @endcan
             <span class="role-badge" title="Peran akun yang sedang login">{{ auth()->user()->name }} &middot; {{ auth()->user()->roleLabel() }}</span>
             <form method="POST" action="{{ route('logout') }}" style="margin: 0">
