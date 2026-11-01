@@ -8,7 +8,8 @@
     <p class="muted">Anda masuk sebagai <strong>{{ auth()->user()->roleLabel() }}</strong>.</p>
 
     @if (auth()->user()->isPelapor())
-        <p>Di sini Anda akan dapat membuat laporan kejadian dan memantau perkembangan laporan milik Anda.</p>
+        <p>Laporkan keluhan kesehatan setelah konsumsi makanan MBG dan pantau perkembangan laporan Anda.</p>
+        <a class="button" href="{{ route('reports.create') }}">+ Buat Laporan</a>
     @elseif (auth()->user()->isPemantau())
         <p>Di sini Anda akan dapat meninjau kelengkapan laporan, melihat keterkaitan laporan, dan memberi catatan.</p>
     @elseif (auth()->user()->isKoordinator())

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SchoolController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,12 @@ Route::middleware('auth')->group(function () {
     Route::redirect('/', '/dashboard');
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::middleware('can:create-report')->group(function () {
+        Route::get('/laporan/buat', [ReportController::class, 'create'])->name('reports.create');
+        Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');
+    });
+    Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
 
     // Data pendukung hanya dikelola Koordinator Komunitas.
     Route::middleware('can:manage-master-data')->group(function () {

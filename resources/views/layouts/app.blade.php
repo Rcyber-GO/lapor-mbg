@@ -43,6 +43,11 @@
         .page-link { display: block; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 6px; text-decoration: none; color: #1f2937; background: #fff; }
         .page-item.active .page-link { background: #15803d; border-color: #15803d; color: #fff; }
         .page-item.disabled .page-link { color: #9ca3af; }
+        .status-badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: .85rem; font-weight: 600; background: #e5e7eb; color: #374151; }
+        .status-dikirim { background: #dbeafe; color: #1e40af; }
+        .detail-list { display: grid; grid-template-columns: 220px 1fr; gap: 10px 20px; margin: 20px 0 0; }
+        .detail-list dt { font-weight: 600; color: #4b5563; }
+        .detail-list dd { margin: 0; }
         .alert { border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
         .alert ul { margin: 0; padding-left: 18px; }
         .alert-success { background: #dcfce7; color: #166534; }
@@ -50,6 +55,8 @@
         @media (max-width: 680px) {
             .nav { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
             .page { padding: 0 16px; margin-top: 20px; }
+            .detail-list { grid-template-columns: 1fr; gap: 2px; }
+            .detail-list dd { margin-bottom: 10px; }
         }
     </style>
 </head>

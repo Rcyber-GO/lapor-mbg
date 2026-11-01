@@ -26,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFour();
 
         Gate::define('manage-master-data', fn (User $user): bool => $user->isKoordinator());
+        Gate::define('create-report', fn (User $user): bool => $user->isPelapor());
     }
 }
