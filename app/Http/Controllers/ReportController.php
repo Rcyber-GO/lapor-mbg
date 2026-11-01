@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateReportRequest;
 use App\Models\Report;
 use App\Models\School;
+use App\Services\ReportWorkflow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -77,6 +79,34 @@ class ReportController extends Controller
         }
 
         return redirect()->route('reports.show', $report)->with('success', 'Laporan berhasil dikirim.');
+    }
+
+    /**
+     * Hanya pemilik (middleware can:update); BR-01 dicek juga di sini agar
+     * pelapor tidak membuka form yang pasti ditolak saat disimpan.
+     */
+    public function edit(Report $report): View|RedirectResponse
+    {
+        if (! $report->isEditable()) {
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Laporan berstatus "'.$report->statusLabel().'" sedang atau sudah ditinjau sehingga tidak dapat diubah.');
+        }
+
+        return view('reports.edit', [
+            'report' => $report,
+            'schools' => School::orderBy('name')->get(['id', 'name']),
+            'relations' => Report::RELATIONS,
+        ]);
+    }
+
+    public function update(UpdateReportRequest $request, Report $report, ReportWorkflow $workflow): RedirectResponse
+    {
+        $wasIncomplete = $report->status === Report::STATUS_PERLU_DILENGKAPI;
+
+        $workflow->update($report, $request->safe()->except('evidence'), $request->file('evidence'));
+
+        return redirect()->route('reports.show', $report)
+            ->with('success', $wasIncomplete ? 'Laporan diperbarui dan dikirim ulang untuk ditinjau.' : 'Laporan berhasil diperbarui.');
     }
 
     public function show(Report $report): View

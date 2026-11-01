@@ -10,6 +10,21 @@
     </div>
     <p class="muted">Dikirim {{ $report->created_at->translatedFormat('d M Y, H:i') }}</p>
 
+    @can('update', $report)
+        @if ($report->isEditable())
+            <div class="alert {{ $report->status === App\Models\Report::STATUS_PERLU_DILENGKAPI ? 'alert-error' : 'alert-success' }}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+                <span>
+                    @if ($report->status === App\Models\Report::STATUS_PERLU_DILENGKAPI)
+                        Pemantau meminta laporan ini dilengkapi. Lihat catatan di bawah, lalu perbaiki laporan.
+                    @else
+                        Laporan masih dapat diubah sampai mulai ditinjau Pemantau.
+                    @endif
+                </span>
+                <a class="button button-small" href="{{ route('reports.edit', $report) }}">Ubah Laporan</a>
+            </div>
+        @endif
+    @endcan
+
     <dl class="detail-list">
         @can('viewAny', App\Models\Report::class)
             {{-- Hanya nama yang ditampilkan; kontak pribadi pelapor tidak diperlukan untuk peninjauan. --}}

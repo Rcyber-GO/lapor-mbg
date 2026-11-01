@@ -31,6 +31,20 @@ class ReportPolicy
     }
 
     /**
+     * Memperbaiki isi laporan hanya oleh pemiliknya. Kapan masih boleh
+     * (BR-01) ditentukan ReportWorkflow.
+     */
+    public function update(User $user, Report $report): Response
+    {
+        if ($report->user_id === $user->id) {
+            return Response::allow();
+        }
+
+        // Staf boleh melihat laporan tetapi tidak mengubah isinya.
+        return $this->viewAny($user) ? Response::deny() : Response::denyAsNotFound();
+    }
+
+    /**
      * Mengubah status dan memberi catatan peninjauan. Kapan boleh dilakukan
      * (status yang sah) ditentukan ReportWorkflow.
      */

@@ -34,6 +34,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
     Route::get('/laporan/{report}/bukti', [ReportController::class, 'evidence'])->whereNumber('report')->name('reports.evidence');
 
+    // Perbaikan laporan oleh pemiliknya.
+    Route::middleware('can:update,report')->whereNumber('report')->group(function () {
+        Route::get('/laporan/{report}/ubah', [ReportController::class, 'edit'])->name('reports.edit');
+        Route::put('/laporan/{report}', [ReportController::class, 'update'])->name('reports.update');
+    });
+
     // Peninjauan oleh Pemantau Komunitas.
     Route::middleware('can:review,report')->whereNumber('report')->group(function () {
         Route::post('/laporan/{report}/status', [ReportReviewController::class, 'updateStatus'])->name('reports.status');

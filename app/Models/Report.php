@@ -54,6 +54,11 @@ class Report extends Model
     ];
 
     /**
+     * BR-01: status ketika pelapor masih boleh memperbaiki laporannya.
+     */
+    public const EDITABLE_STATUSES = [self::STATUS_DIKIRIM, self::STATUS_PERLU_DILENGKAPI];
+
+    /**
      * Status akhir: tidak ada perubahan status maupun catatan baru setelahnya.
      */
     public const FINAL_STATUSES = [self::STATUS_DITERUSKAN, self::STATUS_SELESAI];
@@ -122,6 +127,11 @@ class Report extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(ReportNote::class);
+    }
+
+    public function isEditable(): bool
+    {
+        return in_array($this->status, self::EDITABLE_STATUSES, true);
     }
 
     public function isFinal(): bool

@@ -5,7 +5,11 @@ namespace App\Services;
 use App\Exceptions\ReportWorkflowException;
 use App\Models\Report;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Satu-satunya tempat perubahan status laporan dan penerapan business rule
@@ -14,6 +18,53 @@ use Illuminate\Support\Facades\DB;
  */
 class ReportWorkflow
 {
+    /**
+     * BR-01: pelapor hanya dapat memperbaiki laporan berstatus Dikirim atau
+     * Perlu Dilengkapi. Laporan yang diperbaiki setelah diminta dilengkapi
+     * kembali berstatus Dikirim agar ditinjau ulang.
+     */
+    public function update(Report $report, array $data, ?UploadedFile $evidence): void
+    {
+        $newPath = $evidence?->store(Report::EVIDENCE_DIRECTORY, Report::EVIDENCE_DISK);
+        $oldPath = null;
+
+        try {
+            DB::transaction(function () use ($report, $data, $evidence, $newPath, &$oldPath) {
+                $report = $this->lock($report);
+
+                if (! $report->isEditable()) {
+                    throw new ReportWorkflowException('Laporan berstatus "'.$report->statusLabel().'" sedang atau sudah ditinjau sehingga tidak dapat diubah.');
+                }
+
+                $report->fill($data);
+
+                if ($newPath) {
+                    $oldPath = $report->evidence_path;
+                    $report->evidence_path = $newPath;
+                    $report->evidence_name = Str::limit($evidence->getClientOriginalName(), 255, '');
+                }
+
+                if ($report->status === Report::STATUS_PERLU_DILENGKAPI) {
+                    $report->status = Report::STATUS_DIKIRIM;
+                }
+
+                $report->save();
+            });
+        } catch (Throwable $e) {
+            // Perubahan dibatalkan: buang file baru, file lama tetap dipakai.
+            if ($newPath) {
+                Storage::disk(Report::EVIDENCE_DISK)->delete($newPath);
+            }
+
+            throw $e;
+        }
+
+        // File lama baru dihapus setelah laporan pasti tersimpan dengan file baru.
+        if ($oldPath) {
+            Storage::disk(Report::EVIDENCE_DISK)->delete($oldPath);
+        }
+    }
+
     /**
      * BR-02: Pemantau mengubah status hanya sesuai Report::REVIEW_TRANSITIONS.
      */
