@@ -70,6 +70,9 @@
             @can('create-report')
                 <a class="nav-link" href="{{ route('reports.index') }}">Laporan Saya</a>
             @endcan
+            @can('viewAny', App\Models\Report::class)
+                <a class="nav-link" href="{{ route('reports.incoming') }}">Laporan Masuk</a>
+            @endcan
             @can('manage-master-data')
                 <a class="nav-link" href="{{ route('schools.index') }}">Sekolah</a>
                 <a class="nav-link" href="{{ route('distributions.index') }}">Distribusi</a>

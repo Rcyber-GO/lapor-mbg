@@ -25,6 +25,7 @@ class ReportController extends Controller
             ->with(['school:id,name', 'distribution:id,distribution_date'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->status))
             ->latest()
+            ->latest('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -32,6 +33,21 @@ class ReportController extends Controller
             'reports' => $reports,
             'statuses' => Report::STATUS_LABELS,
         ]);
+    }
+
+    /**
+     * Seluruh laporan masuk untuk Pemantau dan Koordinator Komunitas
+     * (dibatasi middleware can:viewAny pada route).
+     */
+    public function incoming(): View
+    {
+        $reports = Report::query()
+            ->with(['school:id,name', 'distribution:id,distribution_date', 'user:id,name'])
+            ->latest()
+            ->latest('id')
+            ->paginate(10);
+
+        return view('reports.incoming', ['reports' => $reports]);
     }
 
     public function create(): View

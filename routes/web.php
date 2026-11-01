@@ -27,6 +27,9 @@ Route::middleware('auth')->group(function () {
             ->whereNumber('school')
             ->name('schools.distributions');
     });
+    Route::get('/laporan-masuk', [ReportController::class, 'incoming'])
+        ->middleware('can:viewAny,App\\Models\\Report')
+        ->name('reports.incoming');
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->whereNumber('report')->name('reports.show');
     Route::get('/laporan/{report}/bukti', [ReportController::class, 'evidence'])->whereNumber('report')->name('reports.evidence');
 

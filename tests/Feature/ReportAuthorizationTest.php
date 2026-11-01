@@ -45,10 +45,14 @@ class ReportAuthorizationTest extends TestCase
     }
 
     #[DataProvider('staffRoles')]
-    public function test_staff_can_open_detail_and_evidence(string $role): void
+    public function test_staff_can_open_incoming_list_detail_and_evidence(string $role): void
     {
         $staff = $this->userWithRole($role);
 
+        $this->actingAs($staff)->get('/laporan-masuk')
+            ->assertOk()
+            ->assertSee('<td>#'.$this->report->id.'</td>', false)
+            ->assertSee('Pemilik Laporan');
         $this->actingAs($staff)->get('/laporan/'.$this->report->id)
             ->assertOk()
             ->assertSee('Pemilik Laporan');
@@ -60,7 +64,18 @@ class ReportAuthorizationTest extends TestCase
     {
         $staff = $this->userWithRole($role);
 
+        $this->actingAs($staff)->get('/laporan-masuk')->assertDontSee('pemilik.rahasia@example.test');
         $this->actingAs($staff)->get('/laporan/'.$this->report->id)->assertDontSee('pemilik.rahasia@example.test');
+    }
+
+    public function test_pelapor_cannot_open_incoming_list(): void
+    {
+        $this->actingAs($this->report->user)->get('/laporan-masuk')->assertForbidden();
+    }
+
+    public function test_guest_is_redirected_from_incoming_list(): void
+    {
+        $this->get('/laporan-masuk')->assertRedirect('/login');
     }
 
     public function test_other_pelapor_gets_not_found_for_detail_and_evidence(): void
@@ -77,5 +92,11 @@ class ReportAuthorizationTest extends TestCase
             ->assertOk()
             ->assertDontSee('<dt>Pelapor</dt>', false)
             ->assertSee('Kembali ke Laporan Saya');
+    }
+
+    public function test_navigation_shows_incoming_menu_only_for_staff(): void
+    {
+        $this->actingAs($this->report->user)->get('/dashboard')->assertDontSee('Laporan Masuk');
+        $this->actingAs($this->userWithRole(User::ROLE_PEMANTAU))->get('/dashboard')->assertSee('Laporan Masuk');
     }
 }

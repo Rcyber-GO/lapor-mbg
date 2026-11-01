@@ -11,9 +11,11 @@
         <p>Laporkan keluhan kesehatan setelah konsumsi makanan MBG dan pantau perkembangan laporan Anda.</p>
         <a class="button" href="{{ route('reports.create') }}">+ Buat Laporan</a>
     @elseif (auth()->user()->isPemantau())
-        <p>Di sini Anda akan dapat meninjau kelengkapan laporan, melihat keterkaitan laporan, dan memberi catatan.</p>
+        <p>Tinjau kelengkapan laporan yang masuk dan keterkaitannya dengan sekolah atau distribusi yang sama.</p>
+        <a class="button" href="{{ route('reports.incoming') }}">Lihat Laporan Masuk</a>
     @elseif (auth()->user()->isKoordinator())
-        <p>Di sini Anda akan dapat mengelola data sekolah dan distribusi, melihat rekap, dan mencatat penerusan informasi.</p>
+        <p>Kelola data sekolah dan distribusi, pantau laporan masuk, dan catat penerusan informasi kepada pihak terkait.</p>
+        <a class="button" href="{{ route('reports.incoming') }}">Lihat Laporan Masuk</a>
     @endif
 </section>
 @endsection
