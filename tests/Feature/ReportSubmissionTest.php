@@ -35,6 +35,19 @@ class ReportSubmissionTest extends TestCase
         ];
     }
 
+    public function test_create_form_loads_distributions_via_fetch_instead_of_html(): void
+    {
+        $distribution = Distribution::factory()->create(['menu' => 'Menu yang tidak boleh ada di HTML']);
+
+        $this->actingAs($this->userWithRole(User::ROLE_PELAPOR))
+            ->get('/laporan/buat')
+            ->assertOk()
+            ->assertSee($distribution->school->name)
+            ->assertDontSee('Menu yang tidak boleh ada di HTML')
+            ->assertSee('data-url-template="'.url('/sekolah/__SCHOOL__/distribusi').'"', false)
+            ->assertSee('js/report-form.js');
+    }
+
     public function test_pelapor_can_submit_valid_report(): void
     {
         $pelapor = $this->userWithRole(User::ROLE_PELAPOR);

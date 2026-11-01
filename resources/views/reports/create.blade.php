@@ -21,13 +21,11 @@
         </div>
         <div class="form-field">
             <label for="distribution_id">Distribusi Makanan</label>
-            <select id="distribution_id" name="distribution_id" required>
-                <option value="">Pilih distribusi</option>
-                @foreach ($distributions as $distribution)
-                    <option value="{{ $distribution->id }}" @selected((string) old('distribution_id') === (string) $distribution->id)>
-                        {{ $distribution->school->name }} · {{ $distribution->distribution_date->translatedFormat('d M Y') }} · {{ $distribution->menu }}
-                    </option>
-                @endforeach
+            {{-- Opsi diisi report-form.js lewat fetch() setelah sekolah dipilih. --}}
+            <select id="distribution_id" name="distribution_id" required disabled
+                    data-url-template="{{ route('schools.distributions', ['school' => '__SCHOOL__']) }}"
+                    data-selected="{{ old('distribution_id') }}">
+                <option value="">Pilih sekolah terlebih dahulu</option>
             </select>
         </div>
         <div class="form-field">
@@ -63,3 +61,7 @@
     </form>
 </section>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/report-form.js') }}" defer></script>
+@endpush

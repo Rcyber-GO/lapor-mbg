@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReportRequest;
-use App\Models\Distribution;
 use App\Models\Report;
 use App\Models\School;
 use Illuminate\Http\RedirectResponse;
@@ -34,8 +33,6 @@ class ReportController extends Controller
     {
         return view('reports.create', [
             'schools' => School::orderBy('name')->get(['id', 'name']),
-            // Sementara semua distribusi dikirim ke form; akan diganti fetch() per sekolah.
-            'distributions' => Distribution::with('school:id,name')->orderByDesc('distribution_date')->get(),
             'relations' => Report::RELATIONS,
         ]);
     }
