@@ -10,7 +10,7 @@ Aplikasi web pelaporan dan pemantauan keamanan makanan MBG (Mini Project Proyek 
 | NIM | 251511023 |
 | Kelas | _(isi kelas)_ |
 | Judul | Pelaporan dan Pemantauan Keamanan Makanan MBG |
-| Repository | _(isi URL repository GitHub)_ |
+| Repository | https://github.com/Rcyber-GO/lapor-mbg |
 
 ## Kebutuhan Environment
 
