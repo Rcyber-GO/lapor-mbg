@@ -32,4 +32,16 @@ Semua akun memakai password `password` (tersedia setelah `php artisan migrate --
 
 Registrasi mandiri (`/daftar`) selalu membuat akun Pelapor. Akun Pemantau dan Koordinator hanya disiapkan melalui seeder.
 
+## Menjalankan Test
+
+Feature test memakai database MySQL/MariaDB terpisah agar foreign key dan unique constraint diuji sama seperti di aplikasi:
+
+```sql
+CREATE DATABASE lapor_mbg_test;
+```
+
+```bash
+php artisan test
+```
+
 _Langkah instalasi lengkap akan dilengkapi seiring pengembangan._
