@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * user_id dan status sengaja tidak fillable: pemilik diisi lewat relasi
  * user->reports(), status hanya berubah melalui alur peninjauan.
+ * evidence_path/evidence_name juga tidak fillable: hanya diisi dari file
+ * yang sudah divalidasi dan disimpan server.
  */
 #[Fillable([
     'school_id',
@@ -31,6 +33,10 @@ class Report extends Model
     public const STATUS_LABELS = [
         self::STATUS_DIKIRIM => 'Dikirim',
     ];
+
+    public const EVIDENCE_DISK = 'local';
+
+    public const EVIDENCE_DIRECTORY = 'evidence';
 
     public const RELATIONS = [
         'orang_tua' => 'Orang tua/wali siswa',
@@ -73,5 +79,10 @@ class Report extends Model
     public function relationLabel(): string
     {
         return self::RELATIONS[$this->reporter_relation] ?? $this->reporter_relation;
+    }
+
+    public function evidenceIsImage(): bool
+    {
+        return in_array(strtolower(pathinfo($this->evidence_path, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png'], true);
     }
 }

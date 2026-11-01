@@ -34,6 +34,8 @@ class StoreReportRequest extends FormRequest
             'affected_count' => ['required', 'integer', 'min:1', 'max:5000'],
             'symptoms' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'min:20', 'max:3000'],
+            // mimes memeriksa isi file, extensions memeriksa nama file; max dalam kilobyte (2 MB).
+            'evidence' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'extensions:jpg,jpeg,png,pdf', 'max:2048'],
         ];
     }
 
@@ -70,6 +72,7 @@ class StoreReportRequest extends FormRequest
             'affected_count' => 'perkiraan jumlah siswa terdampak',
             'symptoms' => 'keluhan',
             'description' => 'kronologi',
+            'evidence' => 'bukti pendukung',
         ];
     }
 
@@ -78,6 +81,11 @@ class StoreReportRequest extends FormRequest
         return [
             'distribution_id.exists' => 'Distribusi yang dipilih tidak sesuai dengan sekolah.',
             'incident_date.before_or_equal' => 'Tanggal kejadian tidak boleh melebihi hari ini.',
+            'evidence.mimes' => 'Bukti pendukung harus berupa file JPG, JPEG, PNG, atau PDF.',
+            'evidence.extensions' => 'Bukti pendukung harus berupa file JPG, JPEG, PNG, atau PDF.',
+            'evidence.max' => 'Ukuran bukti pendukung maksimal 2 MB.',
+            // Muncul bila PHP menolak file sebelum sampai ke Laravel (mis. melebihi upload_max_filesize).
+            'evidence.uploaded' => 'Bukti pendukung gagal diunggah. Pastikan ukuran file maksimal 2 MB dan bertipe JPG, PNG, atau PDF.',
         ];
     }
 }

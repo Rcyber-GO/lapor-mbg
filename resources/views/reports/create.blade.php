@@ -7,7 +7,7 @@
     <h1 class="page-heading">Buat Laporan Kejadian</h1>
     <p class="muted">Laporkan keluhan kesehatan yang muncul setelah konsumsi makanan MBG. Laporan akan ditinjau kelengkapannya oleh Pemantau Komunitas.</p>
 
-    <form method="POST" action="{{ route('reports.store') }}">
+    <form method="POST" action="{{ route('reports.store') }}" enctype="multipart/form-data">
         @csrf
 
         <div class="form-field">
@@ -52,6 +52,14 @@
         <div class="form-field">
             <label for="description">Kronologi kejadian</label>
             <textarea id="description" name="description" rows="5" minlength="20" maxlength="3000" placeholder="Ceritakan kapan makanan dikonsumsi, kapan keluhan muncul, dan informasi lain yang Anda ketahui." required>{{ old('description') }}</textarea>
+        </div>
+        <div class="form-field">
+            <label for="evidence">Bukti pendukung</label>
+            <input id="evidence" name="evidence" type="file" accept=".jpg,.jpeg,.png,.pdf" required>
+            <small class="muted">Foto makanan/kemasan atau surat keterangan berobat. Format JPG, PNG, atau PDF, maksimal 2 MB. Samarkan data pribadi yang tidak diperlukan.</small>
+            @if ($errors->any())
+                <small class="muted" style="display: block">File perlu dipilih ulang setelah ada kesalahan pada form.</small>
+            @endif
         </div>
 
         <div class="form-actions">

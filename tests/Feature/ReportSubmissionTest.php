@@ -6,11 +6,20 @@ use App\Models\Distribution;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ReportSubmissionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake(Report::EVIDENCE_DISK);
+    }
 
     private function userWithRole(string $role): User
     {
@@ -31,6 +40,7 @@ class ReportSubmissionTest extends TestCase
             'affected_count' => 5,
             'symptoms' => 'Mual, sakit perut',
             'description' => 'Beberapa jam setelah makan siang anak saya mengeluh mual dan sakit perut.',
+            'evidence' => UploadedFile::fake()->image('bukti.jpg'),
             ...$overrides,
         ];
     }

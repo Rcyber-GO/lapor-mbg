@@ -24,6 +24,9 @@ class ReportFactory extends Factory
             'affected_count' => fake()->numberBetween(1, 20),
             'symptoms' => 'Mual, sakit perut',
             'description' => 'Beberapa jam setelah makan siang, anak mengeluh mual dan sakit perut.',
+            // Hanya referensi path; test yang membutuhkan file fisik menyiapkannya dengan Storage::fake.
+            'evidence_path' => 'evidence/contoh-bukti.png',
+            'evidence_name' => 'bukti.png',
         ];
     }
 }
