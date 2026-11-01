@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -39,15 +40,34 @@ class ReportController extends Controller
      * Seluruh laporan masuk untuk Pemantau dan Koordinator Komunitas
      * (dibatasi middleware can:viewAny pada route).
      */
-    public function incoming(): View
+    public function incoming(Request $request): View
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', Rule::in(array_keys(Report::STATUS_LABELS))],
+            'school_id' => ['nullable', 'integer'],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
+        ], [], [
+            'q' => 'kata kunci',
+            'date_from' => 'tanggal awal',
+            'date_to' => 'tanggal akhir',
+        ]);
+
         $reports = Report::query()
             ->with(['school:id,name', 'distribution:id,distribution_date', 'user:id,name'])
+            ->filter($filters)
             ->latest()
             ->latest('id')
-            ->paginate(10);
+            ->paginate(10)
+            // Filter aktif ikut terbawa pada tautan halaman berikutnya.
+            ->withQueryString();
 
-        return view('reports.incoming', ['reports' => $reports]);
+        return view('reports.incoming', [
+            'reports' => $reports,
+            'statuses' => Report::STATUS_LABELS,
+            'schools' => School::orderBy('name')->get(['id', 'name']),
+        ]);
     }
 
     public function create(): View

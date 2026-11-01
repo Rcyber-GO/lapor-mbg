@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -164,6 +166,34 @@ class Report extends Model
     public function reviewTransitions(): array
     {
         return self::REVIEW_TRANSITIONS[$this->status] ?? [];
+    }
+
+    /**
+     * Filter daftar laporan staf. Kata kunci mencocokkan nomor laporan, keluhan,
+     * kronologi, atau nama sekolah; rentang tanggal memakai tanggal kejadian.
+     *
+     * @param  array{q?: ?string, status?: ?string, school_id?: int|string|null, date_from?: ?string, date_to?: ?string}  $filters
+     */
+    #[Scope]
+    protected function filter(Builder $query, array $filters): void
+    {
+        $keyword = trim((string) ($filters['q'] ?? ''));
+
+        $query
+            ->when($keyword !== '', function (Builder $query) use ($keyword) {
+                $id = ltrim($keyword, '#');
+
+                $query->where(function (Builder $query) use ($keyword, $id) {
+                    $query->where('symptoms', 'like', "%{$keyword}%")
+                        ->orWhere('description', 'like', "%{$keyword}%")
+                        ->orWhereHas('school', fn (Builder $school) => $school->where('name', 'like', "%{$keyword}%"))
+                        ->when(ctype_digit($id), fn (Builder $query) => $query->orWhere('id', (int) $id));
+                });
+            })
+            ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
+            ->when($filters['school_id'] ?? null, fn (Builder $query, $schoolId) => $query->where('school_id', $schoolId))
+            ->when($filters['date_from'] ?? null, fn (Builder $query, string $date) => $query->whereDate('incident_date', '>=', $date))
+            ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('incident_date', '<=', $date));
     }
 
     public function statusLabel(): string
